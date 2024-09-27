@@ -23,14 +23,35 @@ void CreateFiles(const JsonValue &json) {
   TableValue *CurrTable = json.structure;
 
   while (CurrTable != nullptr) {
-    path = json.name + '/' + CurrTable->name + '/' + name;
+    path = json.name + '/' + CurrTable->name + '/';
 
-    ofstream file(path);
+    ofstream file(path + name);
 
     if (file.is_open()) {
       file << SaveData(*CurrTable);
+      file.close();
     } else {
       cerr << "Failed" << endl;
+    }
+
+    path = json.name + '/' + CurrTable->name + '/';
+
+    ofstream PkFile(path + CurrTable->name + "_pk_sequence");
+
+    if (PkFile.is_open()) {
+      PkFile << 1;
+      PkFile.close();
+    } else {
+      cerr << "Failed";
+    }
+
+    ofstream LockFile(path + CurrTable->name + "_lock");
+
+    if (LockFile.is_open()) {
+      LockFile << 0;
+      LockFile.close();
+    } else {
+      cerr << "Failed";
     }
 
     CurrTable = CurrTable->next;
