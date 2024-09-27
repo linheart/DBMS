@@ -1,12 +1,12 @@
+#include "../include/file_manager.h"
 #include "../include/json_parser.h"
-/*#include <iostream>*/
-
-using namespace std;
+#include "../include/utility.h"
 
 int main() {
   JsonValue json = JsonParse();
 
-  PrintJsonValue(json);
+  CreateFiles(json);
+
   FreeJsonValue(json);
 
   return 0;

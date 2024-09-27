@@ -1,29 +1,9 @@
 #ifndef JSON_PARSER_H // JSON_PARSER_H
 #define JSON_PARSER_H
 
-#include <fstream>
-#include <iostream>
-
-using namespace std;
+#include "utility.h"
 
 using text_it = string::iterator;
-
-struct ColumnValue {
-  string column;
-  ColumnValue *next;
-};
-
-struct TableValue {
-  string name;
-  ColumnValue *columns;
-  TableValue *next;
-};
-
-struct JsonValue {
-  string name;
-  int tuples_limit;
-  TableValue *structure;
-};
 
 JsonValue JsonParse();
 void ReadFile(string &output);
