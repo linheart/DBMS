@@ -1,13 +1,9 @@
-#include "../include/file_manager.h"
 #include "../include/json_parser.h"
-#include "../include/utility.h"
 
 int main() {
-  JsonValue json = JsonParse();
+  Json json = JsonParser();
 
-  CreateFiles(json);
-
-  FreeJsonValue(json);
+  /*CreateFiles(json);*/
 
   return 0;
 }

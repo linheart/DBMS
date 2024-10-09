@@ -7,6 +7,9 @@
 
 using namespace std;
 
+constexpr uint32_t FNV_Prime = 0x01000193;
+constexpr uint32_t Seed = 0x811C9DC5;
+
 struct ColumnValue {
   string column;
   ColumnValue *next;
