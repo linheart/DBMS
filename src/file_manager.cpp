@@ -1,17 +1,35 @@
 #include "../include/file_manager.h"
+
+#include <cassert>
 #include <filesystem>
 #include <fstream>
+
+void mkDir(const string &path) {
+  if (!filesystem::exists(path)) {
+    filesystem::create_directory(path);
+  }
+}
+
+void mkFile(const string &path, const string &data) {
+  if (!filesystem::exists(path)) {
+    ofstream file(path);
+    assert(file.is_open());
+    file << data;
+    file.close();
+  }
+}
 
 void createDirectories(const Json &json) {
   string name = json.name;
   string path = name;
   Table *CurrTable = json.structure;
 
-  filesystem::create_directory(path);
+  mkDir(path);
 
   while (CurrTable != nullptr) {
     path = name + '/' + CurrTable->name;
-    filesystem::create_directory(path);
+
+    mkDir(path);
 
     CurrTable = CurrTable->next;
   }
@@ -27,32 +45,9 @@ void createFiles(const Json &json) {
   while (CurrTable != nullptr) {
     path = json.name + '/' + CurrTable->name + '/';
 
-    ofstream file(path + name);
-
-    if (file.is_open()) {
-      file << saveData(*CurrTable);
-      file.close();
-    } else {
-      cerr << "Failed" << endl;
-    }
-
-    ofstream PkFile(path + CurrTable->name + "_pk_sequence");
-
-    if (PkFile.is_open()) {
-      PkFile << 1;
-      PkFile.close();
-    } else {
-      cerr << "Failed";
-    }
-
-    ofstream LockFile(path + CurrTable->name + "_lock");
-
-    if (LockFile.is_open()) {
-      LockFile << 0;
-      LockFile.close();
-    } else {
-      cerr << "Failed";
-    }
+    mkFile(path + name, saveData(*CurrTable));
+    mkFile(path + CurrTable->name + "_pk_sequence", "1\n");
+    mkFile(path + CurrTable->name + "_lock", "0\n");
 
     CurrTable = CurrTable->next;
   }
