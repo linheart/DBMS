@@ -3,10 +3,8 @@
 
 #include "utility.h"
 
-using namespace std;
-
-void CreateDirectories(const JsonValue &json);
-void CreateFiles(const JsonValue &json);
-string SaveData(const TableValue &table);
+void createDirectories(const Json &json);
+void createFiles(const Json &json);
+string saveData(const Table &table);
 
 #endif // FILE_MANAGER_H

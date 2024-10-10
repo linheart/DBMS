@@ -1,9 +1,11 @@
 #include "../include/file_manager.h"
+#include <filesystem>
+#include <fstream>
 
-void CreateDirectories(const JsonValue &json) {
+void createDirectories(const Json &json) {
   string name = json.name;
   string path = name;
-  TableValue *CurrTable = json.structure;
+  Table *CurrTable = json.structure;
 
   filesystem::create_directory(path);
 
@@ -15,12 +17,12 @@ void CreateDirectories(const JsonValue &json) {
   }
 }
 
-void CreateFiles(const JsonValue &json) {
-  CreateDirectories(json);
+void createFiles(const Json &json) {
+  createDirectories(json);
 
   string name = "1.csv";
   string path;
-  TableValue *CurrTable = json.structure;
+  Table *CurrTable = json.structure;
 
   while (CurrTable != nullptr) {
     path = json.name + '/' + CurrTable->name + '/';
@@ -28,13 +30,11 @@ void CreateFiles(const JsonValue &json) {
     ofstream file(path + name);
 
     if (file.is_open()) {
-      file << SaveData(*CurrTable);
+      file << saveData(*CurrTable);
       file.close();
     } else {
       cerr << "Failed" << endl;
     }
-
-    path = json.name + '/' + CurrTable->name + '/';
 
     ofstream PkFile(path + CurrTable->name + "_pk_sequence");
 
@@ -58,13 +58,12 @@ void CreateFiles(const JsonValue &json) {
   }
 }
 
-string SaveData(const TableValue &table) {
+string saveData(const Table &table) {
   string str = "";
-  ColumnValue *CurrColumn = table.columns;
+  Column *CurrColumn = table.columns;
 
   while (CurrColumn->next != nullptr) {
     str += CurrColumn->column + ',';
-
     CurrColumn = CurrColumn->next;
   }
 

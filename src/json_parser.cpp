@@ -1,5 +1,9 @@
 #include "../include/json_parser.h"
 
+#include <cassert>
+#include <fstream>
+#include <sstream>
+
 Json JsonParser() {
   Json json;
 
@@ -43,7 +47,9 @@ void addTable(Json &json, const string &str) {
   newTable->name = key;
   do {
     val = retrieveValue(stream);
-    addColumn(*newTable, val);
+    if (val[0]) {
+      addColumn(*newTable, val);
+    }
   } while (val[0]);
 
   if (!json.structure) {
