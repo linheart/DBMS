@@ -22,16 +22,16 @@ void mkFile(const string &path, const string &data) {
 void createDirectories(const Json &json) {
   string name = json.name;
   string path = name;
-  Table *CurrTable = json.structure;
+  Table *curTable = json.structure;
 
   mkDir(path);
 
-  while (CurrTable != nullptr) {
-    path = name + '/' + CurrTable->name;
+  while (curTable != nullptr) {
+    path = name + '/' + curTable->name;
 
     mkDir(path);
 
-    CurrTable = CurrTable->next;
+    curTable = curTable->next;
   }
 }
 
@@ -40,29 +40,29 @@ void createFiles(const Json &json) {
 
   string name = "1.csv";
   string path;
-  Table *CurrTable = json.structure;
+  Table *curTable = json.structure;
 
-  while (CurrTable != nullptr) {
-    path = json.name + '/' + CurrTable->name + '/';
+  while (curTable != nullptr) {
+    path = json.name + '/' + curTable->name + '/';
 
-    mkFile(path + name, saveData(*CurrTable));
-    mkFile(path + CurrTable->name + "_pk_sequence", "1\n");
-    mkFile(path + CurrTable->name + "_lock", "0\n");
+    mkFile(path + name, saveData(*curTable));
+    mkFile(path + curTable->name + "_pk_sequence", "1\n");
+    mkFile(path + curTable->name + "_lock", "0\n");
 
-    CurrTable = CurrTable->next;
+    curTable = curTable->next;
   }
 }
 
 string saveData(const Table &table) {
   string str = "";
-  Column *CurrColumn = table.columns;
+  Column *curColumn = table.columns;
 
-  while (CurrColumn->next != nullptr) {
-    str += CurrColumn->column + ',';
-    CurrColumn = CurrColumn->next;
+  while (curColumn->next != nullptr) {
+    str += curColumn->column + ',';
+    curColumn = curColumn->next;
   }
 
-  str += CurrColumn->column + '\n';
+  str += curColumn->column + '\n';
 
   return str;
 }

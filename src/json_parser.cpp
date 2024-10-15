@@ -48,7 +48,7 @@ void addTable(Json &json, const string &str) {
   do {
     val = retrieveValue(stream);
     if (val[0]) {
-      addColumn(*newTable, val);
+      newTable->addColumn(val);
     }
   } while (val[0]);
 
@@ -60,20 +60,6 @@ void addTable(Json &json, const string &str) {
       curTable = curTable->next;
     }
     curTable->next = newTable;
-  }
-}
-
-void addColumn(Table &table, const string &column) {
-  Column *newColumn = new Column(column);
-
-  if (!table.columns) {
-    table.columns = newColumn;
-  } else {
-    Column *curColumn = table.columns;
-    while (curColumn->next) {
-      curColumn = curColumn->next;
-    }
-    curColumn->next = newColumn;
   }
 }
 

@@ -6,7 +6,6 @@
 Json JsonParser();
 void retrieveKeyValue(Json &json, const string &str, ifstream &file);
 void addTable(Json &json, const string &str);
-void addColumn(Table &table, const string &column);
 string retrieveValue(istringstream &stream);
 int stringToInt(istringstream &stream);
 
