@@ -42,15 +42,15 @@ void addTable(Json &json, const string &str) {
   Table *newTable = new Table;
   istringstream stream(str);
   string key = retrieveValue(stream);
-  string val;
+  string val = retrieveValue(stream);
+  unsigned i = 1;
 
   newTable->name = key;
-  do {
+  while (val[0]) {
+    newTable->addColumn(val);
+    newTable->columns->find(val)->num = i++;
     val = retrieveValue(stream);
-    if (val[0]) {
-      newTable->addColumn(val);
-    }
-  } while (val[0]);
+  }
 
   if (!json.structure) {
     json.structure = newTable;

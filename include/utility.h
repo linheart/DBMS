@@ -21,6 +21,25 @@ struct Column {
 
     return curColumn;
   }
+
+  void remove(Column *&head, const string &target) {
+    Column *curColumn = head;
+    Column *prevColumn = nullptr;
+
+    while (curColumn->column != target) {
+      prevColumn = curColumn;
+      curColumn = curColumn->next;
+    }
+
+    if (prevColumn) {
+      prevColumn->next = curColumn->next;
+    } else {
+      head = curColumn->next;
+    }
+
+    curColumn->next = nullptr;
+    delete curColumn;
+  }
 };
 
 struct Table {

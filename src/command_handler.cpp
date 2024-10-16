@@ -2,7 +2,6 @@
 #include <cassert>
 #include <filesystem>
 #include <fstream>
-#include <sstream>
 
 void split(string &str, string &left, string &right) {
   istringstream stream(str);
@@ -57,18 +56,17 @@ void printTables(Table *table, const string &name, const string &curLine) {
 
       if (table->columns->find(tmp)) {
         Column *curColumn = table->columns;
-        unsigned j = 1;
 
-        while (getline(stream, tmp, ',')) {
-          if (j == curColumn->num) {
-            newLine += tmp + " ";
-            curColumn = curColumn->next;
-          }
-          j++;
+        while (curColumn && !isdigit(curColumn->column[0])) {
+          unsigned j = 0;
+          istringstream stream(line);
+          while (getline(stream, tmp, ',') && j++ != curColumn->num)
+            ;
+          newLine += tmp + " ";
+          curColumn = curColumn->next;
         }
+        printTables(table->next, name, newLine);
       }
-
-      printTables(table->next, name, newLine);
     }
   }
 }
@@ -87,10 +85,13 @@ void fillingTable(Table &table, const string &name) {
   string path = name + '/' + table.name + '/';
   int i = 1;
   while (filesystem::exists(path + char('0' + i) + ".csv")) {
-    ifstream file(path + char('0' + i++) + ".csv");
+    ifstream file(path + char('0' + i) + ".csv");
 
     string line;
-    getline(file, line);
+    if (i == 1) {
+      getline(file, line);
+    }
+    i++;
 
     while (getline(file, line)) {
       if (line[0]) {
@@ -104,16 +105,109 @@ void fillingTable(Table &table, const string &name) {
   }
 }
 
-unsigned getColumnNum(Table *table, const string &cName) {
-  unsigned i = 1;
-  Column *curColumn = table->columns;
+void editTable(Json &json, Table &table, const string &cName,
+               const string &target) {
+  Table *curTable = json.structure->find(table.name);
+  unsigned num = curTable->columns->find(cName)->num;
+  string path = json.name + '/' + table.name + '/';
+  int i = 1;
+  while (filesystem::exists(path + char('0' + i) + ".csv")) {
+    ifstream file(path + char('0' + i) + ".csv");
 
-  while (curColumn && curColumn->column != cName) {
+    string line;
+    if (i == 1) {
+      getline(file, line);
+    }
+
     i++;
-    curColumn = curColumn->next;
+
+    while (getline(file, line)) {
+      if (line[0]) {
+        istringstream stream(line);
+        string tmp;
+
+        unsigned j = 1;
+        getline(stream, tmp, ',');
+        if (table.columns->find(tmp)) {
+          string pk = tmp;
+
+          while (getline(stream, tmp, ',') && j++ != num)
+            ;
+
+          if (tmp != target) {
+            table.columns->remove(table.columns, pk);
+          }
+        }
+      }
+    }
+    file.close();
+  }
+}
+
+void copyTables(Json &src, Json &target) {
+  Table *curTable = src.structure;
+  while (curTable) {
+    Table *newTable = new Table;
+    newTable->name = curTable->name;
+    Column *curColumn = curTable->columns;
+    while (curColumn) {
+      newTable->addColumn(curColumn->column);
+      newTable->columns->find(curColumn->column)->num = curColumn->num;
+      curColumn = curColumn->next;
+    }
+    target.addTable(newTable);
+    curTable = curTable->next;
+  }
+}
+
+void mergeTable(Json &first, Json &second, const string &tName) {
+  Table *firstTable = first.structure->find(tName);
+  Table *secondTable = second.structure->find(tName);
+
+  Column *firstColumn = firstTable->columns;
+  Column *secondColumn = secondTable->columns;
+  while (secondColumn) {
+    if (!firstColumn->find(secondColumn->column)) {
+      firstTable->addColumn(secondColumn->column);
+    }
+    secondColumn = secondColumn->next;
+  }
+}
+
+void filter(Json &json, Json &finalConfig, istringstream &stream) {
+  string token;
+
+  if (!(stream >> token)) {
+    return;
   }
 
-  return i;
+  string tName;
+  string cName;
+  split(token, tName, cName);
+
+  check(tName, cName, json);
+
+  assert(stream >> token && token == "=");
+  assert(stream >> token);
+
+  string val = token.substr(1, token.size() - 2);
+  Table *table = finalConfig.structure->find(tName);
+
+  if (stream >> token && token == "AND" || token != "OR") {
+    editTable(json, *table, cName, val);
+    filter(json, finalConfig, stream);
+  } else if (token == "OR") {
+    Json *tmp = new Json;
+    copyTables(finalConfig, *tmp);
+    editTable(json, *tmp->structure->find(tName), cName, val);
+    filter(json, finalConfig, stream);
+    mergeTable(finalConfig, *tmp, tName);
+
+    printT(table);
+    printT(tmp->structure);
+
+    delete tmp;
+  }
 }
 
 void menu(Json &json, const string &str) {
@@ -141,30 +235,27 @@ void menu(Json &json, const string &str) {
       }
 
       table->addColumn(cName);
-      table->columns->find(cName)->num =
-          getColumnNum(json.structure->find(tName), cName);
+      Table *tmp = json.structure->find(tName);
+      table->columns->find(cName)->num = tmp->columns->find(cName)->num;
     }
 
-    assert(token == "FROM");
+    assert(finalConfig->structure && token == "FROM");
 
     while (stream >> token && token != "WHERE") {
       if (token[token.size() - 1] == ',') {
         token.pop_back();
       }
+
       assert(json.structure->find(token));
       fillingTable(*finalConfig->structure->find(token), json.name);
     }
 
+    if (token == "WHERE") {
+      filter(json, *finalConfig, stream);
+    }
+
     printColumnNames(finalConfig);
     printTables(finalConfig->structure, finalConfig->name, "");
-
-    while (stream >> token) {
-      if (token == "AND") {
-      } else if (token == "OR") {
-
-      } else {
-      }
-    }
 
     delete finalConfig;
 
