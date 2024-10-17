@@ -20,7 +20,7 @@ void printColumnNames(Json *json) {
   Table *curTable = json->structure;
   while (curTable) {
     Column *curColumn = curTable->columns;
-    while (!isdigit(curColumn->column[0])) {
+    while (curColumn && !isdigit(curColumn->column[0])) {
       cout << curColumn->column << ' ';
       curColumn = curColumn->next;
     }
@@ -202,9 +202,6 @@ void filter(Json &json, Json &finalConfig, istringstream &stream) {
     editTable(json, *tmp->structure->find(tName), cName, val);
     filter(json, finalConfig, stream);
     mergeTable(finalConfig, *tmp, tName);
-
-    printT(table);
-    printT(tmp->structure);
 
     delete tmp;
   }

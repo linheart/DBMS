@@ -54,7 +54,7 @@ void createFiles(const Json &json) {
 }
 
 string saveData(const Table &table) {
-  string str = "";
+  string str = table.name + "_pk,";
   Column *curColumn = table.columns;
 
   while (curColumn->next != nullptr) {
