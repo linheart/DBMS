@@ -2,7 +2,7 @@
   "name": "Схема 1",
   "tuples_limit": 1000,
   "structure": {
-    "person": ["name", "gender", "age"],
-    "car": ["mark","year"]
+    "person": ["name", "gender", "date_of_birth"],
+    "car": ["mark", "year"]
   }
 }
