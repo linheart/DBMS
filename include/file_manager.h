@@ -8,5 +8,6 @@ void mkFile(const string &path, const string &data);
 void createDirectories(const Json &json);
 void createFiles(const Json &json);
 string saveData(const Table &table);
+void addLine(const Json &json, const Table &table);
 
 #endif // FILE_MANAGER_H

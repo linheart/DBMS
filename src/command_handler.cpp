@@ -2,6 +2,7 @@
 #include <cassert>
 #include <filesystem>
 #include <fstream>
+#include <sstream>
 
 void split(string &str, string &left, string &right) {
   istringstream stream(str);
@@ -207,6 +208,20 @@ void filter(Json &json, Json &finalConfig, istringstream &stream) {
   }
 }
 
+string getVal(const string &token) {
+  istringstream stream(token);
+  string val;
+  char ch;
+
+  while (stream >> ch && ch != '\'')
+    ;
+
+  while (stream >> ch && ch != '\'') {
+    val += ch;
+  }
+  return val;
+}
+
 void menu(Json &json, const string &str) {
   istringstream stream(str);
   string token;
@@ -257,6 +272,28 @@ void menu(Json &json, const string &str) {
     delete finalConfig;
 
   } else if (token == "INSERT") {
+    assert(stream >> token && token == "INTO");
+    assert(stream >> token);
+
+    Table *table = json.structure->find(token);
+    assert(table);
+
+    Table t;
+    t.name = token;
+
+    assert(stream >> token && token == "VALUES");
+
+    Column *curColumn = table->columns;
+
+    do {
+      assert(stream >> token);
+      t.addColumn(getVal(token));
+      curColumn = curColumn->next;
+    } while (token.back() != ')' && curColumn);
+
+    assert(!(stream >> token) && !curColumn);
+
+    addLine(json, t);
 
   } else if (token == "DELETE") {
   } else {

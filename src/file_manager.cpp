@@ -1,8 +1,10 @@
 #include "../include/file_manager.h"
 
 #include <cassert>
+#include <cmath>
 #include <filesystem>
 #include <fstream>
+#include <string>
 
 void mkDir(const string &path) {
   if (!filesystem::exists(path)) {
@@ -45,8 +47,8 @@ void createFiles(const Json &json) {
   while (curTable != nullptr) {
     path = json.name + '/' + curTable->name + '/';
 
-    mkFile(path + name, saveData(*curTable));
-    mkFile(path + curTable->name + "_pk_sequence", "1\n");
+    mkFile(path + name, curTable->name + "_pk" + saveData(*curTable));
+    mkFile(path + curTable->name + "_pk_sequence", "0\n");
     mkFile(path + curTable->name + "_lock", "0\n");
 
     curTable = curTable->next;
@@ -54,7 +56,7 @@ void createFiles(const Json &json) {
 }
 
 string saveData(const Table &table) {
-  string str = table.name + "_pk,";
+  string str;
   Column *curColumn = table.columns;
 
   while (curColumn->next != nullptr) {
@@ -65,4 +67,27 @@ string saveData(const Table &table) {
   str += curColumn->column + '\n';
 
   return str;
+}
+
+void addLine(const Json &json, const Table &table) {
+  string path = json.name + '/' + table.name + '/';
+  ifstream pkFile(path + table.name + "_pk_sequence");
+  assert(pkFile.is_open());
+  string a;
+  pkFile >> a;
+  int pk = stoi(a) + 1;
+
+  int i = ceil((double)pk / json.tuples_limit);
+
+  string s = to_string(pk) + ',' + saveData(table);
+
+  path += to_string(i) + ".csv";
+
+  if (filesystem::exists(path)) {
+    ofstream file(path, ios::app);
+    file << s;
+    file.close();
+  } else {
+    mkFile(path, s);
+  }
 }

@@ -1,6 +1,6 @@
 {
   "name": "Схема 1",
-  "tuples_limit": 1000,
+  "tuples_limit": 10,
   "structure": {
     "person": ["name", "gender", "date_of_birth"],
     "car": ["mark", "year"]
