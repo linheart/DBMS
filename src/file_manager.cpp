@@ -4,6 +4,7 @@
 #include <cmath>
 #include <filesystem>
 #include <fstream>
+#include <sstream>
 #include <string>
 
 void mkDir(const string &path) {
@@ -92,5 +93,43 @@ void addLine(const Json &json, const Table &table) {
     file.close();
   } else {
     mkFile(path, s);
+  }
+}
+
+void delLines(const Json &json) {
+  string path = json.name + '/' + json.structure->name + '/';
+  int i = 1;
+  Column *curColumn = json.structure->columns;
+
+  while (filesystem::exists(path + char('0' + i) + ".csv")) {
+    ifstream iFile(path + char('0' + i) + ".csv");
+    ofstream tFile(path + "tmp.csv");
+
+    string line;
+
+    if (i == 1) {
+      getline(iFile, line);
+      tFile << line << endl;
+    }
+
+    while (getline(iFile, line)) {
+      string pk;
+      istringstream stream(line);
+      getline(stream, pk, ',');
+
+      if (curColumn->column == pk) {
+        curColumn = curColumn->next;
+      } else {
+        tFile << line << endl;
+      }
+    }
+
+    filesystem::remove(path + char('0' + i) + ".csv");
+    if (!filesystem::is_empty(path + "tmp.csv")) {
+      filesystem::rename(path + "tmp.csv", path + char('0' + i) + ".csv");
+    } else {
+      filesystem::remove(path + "tmp.csv");
+    }
+    i++;
   }
 }

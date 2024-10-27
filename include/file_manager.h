@@ -9,5 +9,6 @@ void createDirectories(const Json &json);
 void createFiles(const Json &json);
 string saveData(const Table &table);
 void addLine(const Json &json, const Table &table);
+void delLines(const Json &json);
 
 #endif // FILE_MANAGER_H

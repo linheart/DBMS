@@ -11,6 +11,5 @@ void fillingTable(Table &table, const string &name);
 void mergeTable(Json &first, Json &second);
 void filter(Json &json, Json &finalConfig, istringstream &stream);
 void menu(Json &json, const string &str);
-void printT(Table *table);
 
 #endif // COMMAND_HANDLER_H

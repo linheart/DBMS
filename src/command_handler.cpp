@@ -278,8 +278,8 @@ void menu(Json &json, const string &str) {
     Table *table = json.structure->find(token);
     assert(table);
 
-    Table t;
-    t.name = token;
+    Table finalTable;
+    finalTable.name = token;
 
     assert(stream >> token && token == "VALUES");
 
@@ -287,15 +287,34 @@ void menu(Json &json, const string &str) {
 
     do {
       assert(stream >> token);
-      t.addColumn(getVal(token));
+      finalTable.addColumn(getVal(token));
       curColumn = curColumn->next;
     } while (token.back() != ')' && curColumn);
 
     assert(!(stream >> token) && !curColumn);
 
-    addLine(json, t);
+    addLine(json, finalTable);
 
   } else if (token == "DELETE") {
+    assert(stream >> token && token == "FROM");
+    assert(stream >> token);
+    assert(json.structure->find(token));
+
+    Json *finalConfig = new Json;
+    finalConfig->name = json.name;
+
+    Table *table = new Table;
+    table->name = token;
+    finalConfig->addTable(table);
+
+    assert(stream >> token && token == "WHERE");
+
+    fillingTable(*table, json.name);
+    filter(json, *finalConfig, stream);
+
+    delLines(*finalConfig);
+
+    delete finalConfig;
   } else {
     cout << "Wrong query" << endl;
   }
