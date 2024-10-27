@@ -47,7 +47,7 @@ void createFiles(const Json &json) {
   while (curTable != nullptr) {
     path = json.name + '/' + curTable->name + '/';
 
-    mkFile(path + name, curTable->name + "_pk" + saveData(*curTable));
+    mkFile(path + name, curTable->name + "_pk" + ',' + saveData(*curTable));
     mkFile(path + curTable->name + "_pk_sequence", "0\n");
     mkFile(path + curTable->name + "_lock", "0\n");
 
@@ -78,6 +78,9 @@ void addLine(const Json &json, const Table &table) {
   int pk = stoi(a) + 1;
 
   int i = ceil((double)pk / json.tuples_limit);
+
+  ofstream file(path + table.name + "_pk_sequence");
+  file << to_string(pk);
 
   string s = to_string(pk) + ',' + saveData(table);
 
