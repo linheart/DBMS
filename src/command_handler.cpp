@@ -259,6 +259,12 @@ void menu(Json &json, const string &str) {
       }
 
       assert(json.structure->find(token));
+      assert(isTableFree(json.name, token));
+      if (!finalConfig->structure->find(token)) {
+        Table *newTable = new Table;
+        newTable->name = token;
+        finalConfig->addTable(newTable);
+      }
       fillingTable(*finalConfig->structure->find(token), json.name);
     }
 
@@ -275,6 +281,7 @@ void menu(Json &json, const string &str) {
     assert(stream >> token && token == "INTO");
     assert(stream >> token);
 
+    assert(isTableFree(json.name, token));
     Table *table = json.structure->find(token);
     assert(table);
 
@@ -298,6 +305,7 @@ void menu(Json &json, const string &str) {
   } else if (token == "DELETE") {
     assert(stream >> token && token == "FROM");
     assert(stream >> token);
+    assert(isTableFree(json.name, token));
     assert(json.structure->find(token));
 
     Json *finalConfig = new Json;
@@ -315,7 +323,14 @@ void menu(Json &json, const string &str) {
     delLines(*finalConfig);
 
     delete finalConfig;
-  } else {
+  } else if (token == "FREE") {
+    Table *curTable = json.structure;
+    while (curTable) {
+      unlockTable(json.name, curTable->name);
+      curTable = curTable->next;
+    }
+
+  } else if (token != "EXIT") {
     cout << "Wrong query" << endl;
   }
 }

@@ -3,6 +3,9 @@
 
 #include "utility.h"
 
+bool isTableFree(const string &schemaName, const string &tableName);
+void lockTable(const string &schemaName, const string &tableName);
+void unlockTable(const string &schemaName, const string &tableName);
 void mkDir(const string &path);
 void mkFile(const string &path, const string &data);
 void createDirectories(const Json &json);

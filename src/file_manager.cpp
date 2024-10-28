@@ -7,6 +7,30 @@
 #include <sstream>
 #include <string>
 
+bool isTableFree(const string &schemaName, const string &tableName) {
+  string path = schemaName + '/' + tableName + '/' + tableName + "_lock";
+  ifstream file(path);
+  string lock;
+  file >> lock;
+  file.close();
+
+  return lock == "0";
+}
+
+void lockTable(const string &schemaName, const string &tableName) {
+  string path = schemaName + '/' + tableName + '/' + tableName + "_lock";
+  ofstream file(path);
+  file << "1";
+  file.close();
+}
+
+void unlockTable(const string &schemaName, const string &tableName) {
+  string path = schemaName + '/' + tableName + '/' + tableName + "_lock";
+  ofstream file(path);
+  file << "0";
+  file.close();
+}
+
 void mkDir(const string &path) {
   if (!filesystem::exists(path)) {
     filesystem::create_directory(path);
