@@ -3,6 +3,6 @@
 
 #include "hash_table.h"
 
-void JsonParser(HT &table);
+Array JsonParser(HT &table);
 
 #endif // JSON_PARSER_H

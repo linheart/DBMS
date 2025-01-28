@@ -33,12 +33,16 @@ string retrieveValue(istringstream &stream) {
 }
 
 void retrieveColumns(HT &table, istringstream &stream, const string &key) {
-  while (stream) {
-    table[key].append(retrieveValue(stream));
+  string col = retrieveValue(stream);
+  while (col[0]) {
+    table[key].append(col);
+    col = retrieveValue(stream);
   }
 }
 
-void JsonParser(HT &table) {
+Array JsonParser(HT &table) { // возвращает названия таблиц
+  Array names;
+
   ifstream file("schema.json");
   assert(file);
 
@@ -52,9 +56,11 @@ void JsonParser(HT &table) {
     } else if (key == "tuples_limit") {
       table.tuples_limit = stringToInt(stream);
     } else if (key[0] && key != "structure") {
+      names.append(key);
       retrieveColumns(table, stream, key);
     }
   }
 
   file.close();
+  return names;
 }
