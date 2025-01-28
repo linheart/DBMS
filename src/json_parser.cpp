@@ -4,63 +4,19 @@
 #include <fstream>
 #include <sstream>
 
-Json JsonParser() {
-  Json json;
+using namespace std;
 
-  ifstream file("schema.json");
-  assert(file);
+int stringToInt(istringstream &stream) {
+  char ch;
+  int num = 0;
+  while (stream >> ch && !isdigit(ch))
+    ;
 
-  string line;
+  do {
+    num = num * 10 + ch - '0';
+  } while (stream >> ch && ch != ',');
 
-  while (getline(file, line)) {
-    retrieveKeyValue(json, line, file);
-  }
-
-  file.close();
-  return json;
-}
-
-void retrieveKeyValue(Json &json, const string &str, ifstream &file) {
-  istringstream stream(str);
-  string key;
-
-  key = retrieveValue(stream);
-
-  if (key == "name") {
-    json.name = retrieveValue(stream);
-  } else if (key == "tuples_limit") {
-    json.tuples_limit = stringToInt(stream);
-  } else if (key == "structure") {
-    string line;
-    while (getline(file, line) && line != "  }") {
-      addTable(json, line);
-    }
-  }
-}
-
-void addTable(Json &json, const string &str) {
-  Table *newTable = new Table;
-  istringstream stream(str);
-  string key = retrieveValue(stream);
-  string val = retrieveValue(stream);
-  unsigned i = 1;
-
-  newTable->name = key;
-  while (val[0]) {
-    newTable->addColumn(val);
-    newTable->columns->find(val)->num = i++;
-    val = retrieveValue(stream);
-  }
-
-  if (!json.structure) {
-    json.structure = newTable;
-  } else {
-    Table *curTable = json.structure;
-    while (curTable->next) {
-      curTable = curTable->next;
-    }
-    curTable->next = newTable;
-  }
+  return num;
 }
 
 string retrieveValue(istringstream &stream) {
@@ -76,15 +32,29 @@ string retrieveValue(istringstream &stream) {
   return val;
 }
 
-int stringToInt(istringstream &stream) {
-  char ch;
-  int num = 0;
-  while (stream >> ch && !isdigit(ch))
-    ;
+void retrieveColumns(HT &table, istringstream &stream, const string &key) {
+  while (stream) {
+    table[key].append(retrieveValue(stream));
+  }
+}
 
-  do {
-    num = num * 10 + ch - '0';
-  } while (stream >> ch && ch != ',');
+void JsonParser(HT &table) {
+  ifstream file("schema.json");
+  assert(file);
 
-  return num;
+  string line;
+  while (getline(file, line)) {
+    istringstream stream(line);
+
+    string key = retrieveValue(stream);
+    if (key == "name") {
+      table.name = retrieveValue(stream);
+    } else if (key == "tuples_limit") {
+      table.tuples_limit = stringToInt(stream);
+    } else if (key[0] && key != "structure") {
+      retrieveColumns(table, stream, key);
+    }
+  }
+
+  file.close();
 }
