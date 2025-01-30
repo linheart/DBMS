@@ -3,13 +3,13 @@
 
 #include "file_manager.h"
 
-void split(string &str, string &left, string &right);
-void printColumnNames(Json *json);
-void printTables(Table *table, const string &name, const string &curLine);
-void check(const string &tName, const string &cName, Json &json);
-void fillingTable(Table &table, const string &name);
-void mergeTable(Json &first, Json &second);
-void filter(Json &json, Json &finalConfig, istringstream &stream);
-void menu(Json &json, const string &str);
+/*void split(string &str, string &left, string &right);*/
+/*void printColumnNames(Json *json);*/
+/*void printTables(Table *table, const string &name, const string &curLine);*/
+/*void check(const string &tName, const string &cName, Json &json);*/
+/*void fillingTable(Table &table, const string &name);*/
+/*void mergeTable(Json &first, Json &second);*/
+/*void filter(Json &json, Json &finalConfig, istringstream &stream);*/
+void menu(HT &table, const std::string &str);
 
 #endif // COMMAND_HANDLER_H

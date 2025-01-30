@@ -1,6 +1,5 @@
 #include "../include/file_manager.h"
 
-#include <cassert>
 #include <cmath>
 #include <filesystem>
 #include <fstream>
@@ -12,9 +11,10 @@ bool isTableFree(const string &schemaName, const string &tableName) {
   string path = schemaName + '/' + tableName + '/' + tableName + "_lock";
   ifstream file(path);
   string lock;
-  file >> lock;
-  file.close();
-
+  if (file.is_open()) {
+    file >> lock;
+    file.close();
+  }
   return lock == "0";
 }
 
@@ -53,14 +53,14 @@ void mkDir(const string &path) {
 void mkFile(const string &path, const string &data) {
   if (!filesystem::exists(path)) {
     ofstream file(path);
-    assert(file.is_open());
-    file << data;
-    file.close();
+    if (file.is_open()) {
+      file << data;
+      file.close();
+    }
   }
 }
 
 void createFiles(HT &table, Array &names) {
-  string name = "1.csv";
   string path;
 
   string scheme = table.name;
@@ -74,5 +74,38 @@ void createFiles(HT &table, Array &names) {
     mkFile(path + "1.csv", names[i] + "_pk," + saveData(table[names[i]]));
     mkFile(path + names[i] + "_pk_sequence", "0\n");
     mkFile(path + names[i] + "_lock", "0\n");
+  }
+}
+
+void addLine(HT &table, Array &curTable) {
+  string path = table.name + '/' + curTable.name + '/';
+  ifstream pkFile(path + curTable.name + "_pk_sequence");
+
+  if (pkFile.is_open()) {
+    string pk;
+    pkFile >> pk;
+
+    pk = to_string(stoi(pk) + 1);
+
+    ofstream file(path + curTable.name + "_pk_sequence");
+    file << pk;
+
+    string line = pk + ',';
+    size_t size = curTable.size();
+    for (size_t i = 0; i < size - 1; i++) {
+      line += table[curTable[i]][0] + ',';
+    }
+    line += table[curTable[size - 1]][0];
+
+    int i = ceil((double)(stoi(pk)) / table.tuples_limit);
+    path += to_string(i) + ".csv";
+
+    if (filesystem::exists(path)) {
+      ofstream file(path, ios::app);
+      file << line;
+      file.close();
+    } else {
+      mkFile(path, line);
+    }
   }
 }

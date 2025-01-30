@@ -6,6 +6,8 @@
 
 class Array {
 public:
+  std::string name;
+
   Array(std::size_t initialCapacity = 10)
       : data(new std::string[initialCapacity]), capacity(initialCapacity),
         length(0) {}
