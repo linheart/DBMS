@@ -1,259 +1,325 @@
 #include "../include/command_handler.h"
-#include <cassert>
-#include <cstdlib>
 #include <filesystem>
 #include <fstream>
-#include <sstream>
-#include <stdexcept>
 
 using namespace std;
 
-/*void split(string &str, string &left, string &right) {*/
-/*  istringstream stream(str);*/
-/*  char ch;*/
-/**/
-/*  while (stream >> ch && ch != '.') {*/
-/*    left += ch;*/
-/*  }*/
-/**/
-/*  while (stream >> ch && ch != ',') {*/
-/*    right += ch;*/
-/*  }*/
-/*}*/
-/**/
-/*void printColumnNames(Json *json) {*/
-/*  Table *curTable = json->structure;*/
-/*  while (curTable) {*/
-/*    Column *curColumn = curTable->columns;*/
-/*    while (curColumn && !isdigit(curColumn->column[0])) {*/
-/*      cout << curColumn->column << ' ';*/
-/*      curColumn = curColumn->next;*/
-/*    }*/
-/*    curTable = curTable->next;*/
-/*  }*/
-/*  cout << endl;*/
-/*}*/
-/**/
-/*void printTables(Table *table, const string &name, const string &curLine) {*/
-/*  if (!table) {*/
-/*    cout << curLine << endl;*/
-/*    return;*/
-/*  }*/
-/**/
-/*  string path = name + '/' + table->name + '/';*/
-/*  int i = 1;*/
-/**/
-/*  while (filesystem::exists(path + char('0' + i) + ".csv")) {*/
-/*    ifstream file(path + char('0' + i) + ".csv");*/
-/*    string line;*/
-/**/
-/*    if (i++ == 1) {*/
-/*      getline(file, line);*/
-/*    }*/
-/**/
-/*    while (getline(file, line)) {*/
-/*      string newLine = curLine;*/
-/**/
-/*      istringstream stream(line);*/
-/*      string tmp;*/
-/**/
-/*      getline(stream, tmp, ',');*/
-/**/
-/*      if (table->columns->find(tmp)) {*/
-/*        Column *curColumn = table->columns;*/
-/**/
-/*        while (curColumn && !isdigit(curColumn->column[0])) {*/
-/*          unsigned j = 0;*/
-/*          istringstream stream(line);*/
-/*          while (getline(stream, tmp, ',') && j++ != curColumn->num)*/
-/*            ;*/
-/*          newLine += tmp + " ";*/
-/*          curColumn = curColumn->next;*/
-/*        }*/
-/*        printTables(table->next, name, newLine);*/
-/*      }*/
-/*    }*/
-/*  }*/
-/*}*/
-/**/
-/*void check(const string &tName, const string &cName, Json &json) {*/
-/*  assert(tName[0] && cName[0]);*/
-/**/
-/*  Table *table = json.structure->find(tName);*/
-/*  assert(table);*/
-/**/
-/*  Column *column = table->columns->find(cName);*/
-/*  assert(column);*/
-/*}*/
-/**/
-/*void fillingTable(Table &table, const string &name) {*/
-/*  string path = name + '/' + table.name + '/';*/
-/*  int i = 1;*/
-/*  while (filesystem::exists(path + char('0' + i) + ".csv")) {*/
-/*    ifstream file(path + char('0' + i) + ".csv");*/
-/**/
-/*    string line;*/
-/*    if (i == 1) {*/
-/*      getline(file, line);*/
-/*    }*/
-/*    i++;*/
-/**/
-/*    while (getline(file, line)) {*/
-/*      if (line[0]) {*/
-/*        istringstream stream(line);*/
-/*        string tmp;*/
-/*        getline(stream, tmp, ',');*/
-/*        table.addColumn(tmp);*/
-/*      }*/
-/*    }*/
-/*    file.close();*/
-/*  }*/
-/*}*/
-/**/
-/*void editTable(Json &json, Table &table, const string &cName,*/
-/*               const string &target) {*/
-/*  Table *curTable = json.structure->find(table.name);*/
-/*  unsigned num = curTable->columns->find(cName)->num;*/
-/*  string path = json.name + '/' + table.name + '/';*/
-/*  int i = 1;*/
-/*  while (filesystem::exists(path + char('0' + i) + ".csv")) {*/
-/*    ifstream file(path + char('0' + i) + ".csv");*/
-/**/
-/*    string line;*/
-/*    if (i == 1) {*/
-/*      getline(file, line);*/
-/*    }*/
-/**/
-/*    i++;*/
-/**/
-/*    while (getline(file, line)) {*/
-/*      if (line[0]) {*/
-/*        istringstream stream(line);*/
-/*        string tmp;*/
-/**/
-/*        unsigned j = 1;*/
-/*        getline(stream, tmp, ',');*/
-/*        if (table.columns->find(tmp)) {*/
-/*          string pk = tmp;*/
-/**/
-/*          while (getline(stream, tmp, ',') && j++ != num)*/
-/*            ;*/
-/**/
-/*          if (tmp != target) {*/
-/*            table.columns->remove(table.columns, pk);*/
-/*          }*/
-/*        }*/
-/*      }*/
-/*    }*/
-/*    file.close();*/
-/*  }*/
-/*}*/
-/**/
-/*void copyTables(Json &src, Json &target) {*/
-/*  Table *curTable = src.structure;*/
-/*  while (curTable) {*/
-/*    Table *newTable = new Table;*/
-/*    newTable->name = curTable->name;*/
-/*    Column *curColumn = curTable->columns;*/
-/*    while (curColumn) {*/
-/*      newTable->addColumn(curColumn->column);*/
-/*      newTable->columns->find(curColumn->column)->num = curColumn->num;*/
-/*      curColumn = curColumn->next;*/
-/*    }*/
-/*    target.addTable(newTable);*/
-/*    curTable = curTable->next;*/
-/*  }*/
-/*}*/
-/**/
-/*void mergeTable(Json &first, Json &second, const string &tName) {*/
-/*  Table *firstTable = first.structure->find(tName);*/
-/*  Table *secondTable = second.structure->find(tName);*/
-/**/
-/*  Column *firstColumn = firstTable->columns;*/
-/*  Column *secondColumn = secondTable->columns;*/
-/*  while (secondColumn) {*/
-/*    if (!firstColumn->find(secondColumn->column)) {*/
-/*      firstTable->addColumn(secondColumn->column);*/
-/*    }*/
-/*    secondColumn = secondColumn->next;*/
-/*  }*/
-/*}*/
-/**/
-/*void filter(Json &json, Json &finalConfig, istringstream &stream) {*/
-/*  string token;*/
-/**/
-/*  if (!(stream >> token)) {*/
-/*    return;*/
-/*  }*/
-/**/
-/*  string tName;*/
-/*  string cName;*/
-/*  split(token, tName, cName);*/
-/**/
-/*  check(tName, cName, json);*/
-/**/
-/*  assert(stream >> token && token == "=");*/
-/*  assert(stream >> token);*/
-/**/
-/*  string val = token.substr(1, token.size() - 2);*/
-/*  Table *table = finalConfig.structure->find(tName);*/
-/**/
-/*  if (stream >> token && token == "AND" || token != "OR") {*/
-/*    editTable(json, *table, cName, val);*/
-/*    filter(json, finalConfig, stream);*/
-/*  } else if (token == "OR") {*/
-/*    Json *tmp = new Json;*/
-/*    copyTables(finalConfig, *tmp);*/
-/*    editTable(json, *tmp->structure->find(tName), cName, val);*/
-/*    filter(json, finalConfig, stream);*/
-/*    mergeTable(finalConfig, *tmp, tName);*/
-/**/
-/*    delete tmp;*/
-/*  }*/
-/*}*/
-/**/
-/*string getVal(const string &token) {*/
-/*  istringstream stream(token);*/
-/*  string val;*/
-/*  char ch;*/
-/**/
-/*  while (stream >> ch && ch != '\'')*/
-/*    ;*/
-/**/
-/*  while (stream >> ch && ch != '\'') {*/
-/*    val += ch;*/
-/*  }*/
-/*  return val;*/
-/*}*/
+void split(string &str, string &left, string &right) {
+  istringstream stream(str);
+  char ch;
+
+  while (stream >> ch && ch != '.') {
+    left += ch;
+  }
+
+  while (stream >> ch && ch != ',') {
+    right += ch;
+  }
+}
+
+void printColumnNames(Array &names) {
+
+  for (size_t i = 0; i < names.size(); i++) {
+    string tName;
+    string cName;
+    split(names[i], tName, cName);
+    cout << cName << '\t';
+  }
+  cout << endl;
+}
+
+void printTables(HT &table, Array &names, Array &lines, size_t index) {
+
+  if (index == names.size()) {
+    size_t size = lines.size();
+    for (size_t i = 0; i < size; i++) {
+      cout << lines[i] << '\t';
+    }
+    cout << endl;
+    return;
+  }
+
+  string firstTable;
+  string _;
+
+  split(names[index], firstTable, _);
+
+  Array columns;
+
+  while (index + columns.size() < names.size()) {
+    string tName;
+    string cName;
+    split(names[index + columns.size()], tName, cName);
+    if (tName != firstTable) {
+      break;
+    }
+    columns.append(cName);
+  }
+
+  size_t size = table[firstTable + columns[0]].size();
+  for (size_t i = 0; i < size; i++) {
+    Array nextLines = lines;
+    for (size_t j = 0; j < columns.size(); j++) {
+      nextLines.append(table[firstTable + columns[j]][i]);
+    }
+    printTables(table, names, nextLines, index + columns.size());
+  }
+}
+
+void saveLine(HT &table, const string &tName, const string &line) {
+  Array &names = table[tName];
+  istringstream stream(line);
+  string val;
+
+  for (size_t i = 0; i < names.size(); i++) {
+    getline(stream, val, ',');
+    table[tName + names[i]].append(val);
+  }
+}
+
+void editTable(HT &table, const string &tName, const string &cName,
+               const string &target = "") {
+  string path = table.name + '/' + table[tName].name + '/';
+  for (int i = 1; filesystem::exists(path + char('0' + i) + ".csv"); i++) {
+    ifstream file(path + char('0' + i) + ".csv");
+
+    string line;
+    if (i == 1) {
+      getline(file, line);
+    }
+
+    while (getline(file, line)) {
+      if (line[0]) {
+        istringstream stream(line);
+        string tmp;
+        size_t colPos = table[tName].find(cName);
+
+        for (size_t j = 0; j <= colPos; j++) {
+          getline(stream, tmp, ',');
+        }
+
+        if (tmp == target || target == "") {
+          saveLine(table, tName, line);
+        }
+      }
+    }
+    file.close();
+  }
+}
+
+bool check(const string tName, const string cName, HT &table) {
+
+  if (!tName[0] || !cName[0]) {
+    cout << "Syntax error: Expected 'table1.column1'" << endl;
+  } else if (table[tName].find(cName) == table[tName].size()) {
+    cout << "Invalid error: There's no such table or column" << endl;
+  } else if (!isTableFree(table.name, tName)) {
+    cout << "This table is currently in use" << endl;
+  } else {
+    return true;
+  }
+  return false;
+}
+
+string extractWord(const string &str) {
+  string result;
+  for (char c : str) {
+    if (isalnum(static_cast<unsigned char>(c))) {
+      result += c;
+    }
+  }
+  return result;
+}
+
+void copyLine(HT &src, HT &target, const string &tName, size_t pos) {
+  Array &names = src[tName];
+
+  size_t size = names.size();
+  for (size_t i = 0; i < size; i++) {
+    target[tName + names[i]].append(src[tName + names[i]][pos]);
+  }
+}
+
+void removeLine(HT &table, const string &tName, size_t pos) {
+  Array &names = table[tName];
+
+  size_t size = names.size();
+  for (size_t i = 0; i < size; i++) {
+    table[tName + names[i]].remove(pos);
+  }
+}
+
+void intersectionTables(HT &table1, HT &table2, const string tName1,
+                        const string tName2) {
+  string key1 = tName1 + table1[tName1][0];
+  string key2 = tName2 + table2[tName2][0];
+
+  for (size_t i = 0; i < table1[key1].size(); i++) {
+    if (table2[key2].find(table1[key1][i]) == table2[key2].size()) {
+      if (tName1 == tName2) {
+        removeLine(table1, tName1, i);
+      }
+    } else if (tName1 != tName2) {
+      copyLine(table2, table1, tName2, i);
+    }
+  }
+}
+
+void unionTables(HT &table1, HT &table2, const string tName1,
+                 const string tName2) {
+  string key1 = tName1 + table1[tName1][0];
+  string key2 = tName2 + table2[tName2][0];
+
+  for (size_t i = 0; i < table2[key2].size(); i++) {
+    if (tName1 != tName2) {
+      copyLine(table2, table1, tName2, i);
+    } else if (table1[key1].find(table2[key2][i]) == table1[key1].size()) {
+      copyLine(table2, table1, tName1, i);
+    }
+  }
+}
+
+void filter(HT &table, istringstream &stream, const string token,
+            Array &usedTables, string &curTName) {
+  string curToken;
+  if (!(stream >> curToken)) {
+    if (token == "WHERE" || token == "AND" || token == "OR") {
+      cout << "Syntax error: Expected condition" << endl;
+    }
+    return;
+  }
+
+  string tName;
+  string cName;
+  split(curToken, tName, cName);
+
+  if (!check(tName, cName, table)) {
+    return;
+  } else if (!(stream >> curToken) || curToken != "=" ||
+             !(stream >> curToken)) {
+    cout << "Syntax error: Expected 'table1.column1 = val'" << endl;
+    return;
+  }
+
+  string val = extractWord(curToken);
+  if (!val[0]) {
+    cout << "Syntax error: Expected value" << endl;
+    return;
+  }
+
+  editTable(table, tName, cName, val);
+  usedTables.append(tName);
+  curTName = tName;
+
+  if (token == "AND") {
+    return;
+  }
+
+  if (stream >> curToken) {
+    HT tmp(table);
+    for (size_t i = 0; i < tmp[tName].size(); i++) {
+      tmp[tName + tmp[tName][i]].clear();
+    }
+    filter(tmp, stream, curToken, usedTables, curTName);
+    if (curToken == "AND") {
+      intersectionTables(table, tmp, tName, curTName);
+      if (stream >> curToken) {
+        filter(table, stream, curToken, usedTables, tName);
+      }
+    } else if (curToken == "OR") {
+      unionTables(table, tmp, tName, curTName);
+    }
+  }
+}
+
+void selectHandler(HT &table, istringstream &stream) {
+  string token;
+  HT finaltable(table);
+  Array names;
+  stream >> token;
+  do {
+    string tName;
+    string cName;
+    split(token, tName, cName);
+
+    if (!check(tName, cName, table)) {
+      return;
+    }
+    names.append(token);
+
+  } while (stream >> token && token != "FROM");
+
+  if (token != "FROM") {
+    cout << "Syntax error: Expected 'FROM token'" << endl;
+    return;
+  }
+
+  while (stream >> token && token != "WHERE") {
+    token = extractWord(token);
+    if (!finaltable[token].size()) {
+      cout << "Invalid error: This table does not exist" << endl;
+      return;
+    }
+  }
+
+  Array usedTables;
+  if (token == "WHERE") {
+    string tmp;
+    filter(finaltable, stream, token, usedTables, tmp);
+  }
+
+  size_t size = names.size();
+  for (size_t i = 0; i < size; i++) {
+    string tName;
+    string cName;
+
+    split(names[i], tName, cName);
+
+    if (usedTables.find(tName) == usedTables.size()) {
+      editTable(finaltable, tName, cName);
+    }
+  }
+
+  printColumnNames(names);
+
+  Array lines;
+  printTables(finaltable, names, lines, 0);
+}
 
 void insertHandler(HT &table, istringstream &stream) {
   string token;
   if (!(stream >> token) || token != "INTO" || !(stream >> token)) {
     cout << "Syntax error: Expected 'INTO table'" << endl;
     return;
+  } else if (!table[token].size()) {
+    cout << "Invalid error: This table does not exist" << endl;
   } else if (!isTableFree(table.name, token)) {
     cout << "This table is currently in use" << endl;
     return;
   }
 
-  Array &curTable = table[token];
-  curTable.name = token;
+  HT finalTable(table);
+  string tName = token;
 
   if (!(stream >> token) || token != "VALUES") {
     cout << "Syntax error: Expected 'VALUES'" << endl;
     return;
   }
 
-  size_t size = curTable.size();
+  string line;
+  size_t size = finalTable[tName].size();
+
   for (size_t i = 0; i < size; i++) {
     if (!(stream >> token)) {
-      cout << "Syntax error: Expected values" << endl;
+      cout << "Syntax error: " << size << " values were expected" << endl;
       return;
     }
-    table[curTable[i]].append(token);
+
+    line += extractWord(token);
+    (i == size - 1) ? line += '\n' : line += ',';
   }
 
-  addLine(table, curTable);
+  addLine(table, tName, line);
 }
 
 void menu(HT &table, const string &str) {
@@ -263,57 +329,9 @@ void menu(HT &table, const string &str) {
   stream >> token;
 
   if (token == "SELECT") {
-    /*Json *finalConfig = new Json;*/
-    /*finalConfig->name = json.name;*/
-    /*while (stream >> token && token != "FROM") {*/
-    /*  string tName;*/
-    /*  string cName;*/
-    /*  split(token, tName, cName);*/
-    /**/
-    /*  check(tName, cName, json);*/
-    /**/
-    /*  Table *table = finalConfig->structure->find(tName);*/
-    /**/
-    /*  if (!table) {*/
-    /*    table = new Table;*/
-    /*    table->name = tName;*/
-    /*    finalConfig->addTable(table);*/
-    /*  }*/
-    /**/
-    /*  table->addColumn(cName);*/
-    /*  Table *tmp = json.structure->find(tName);*/
-    /*  table->columns->find(cName)->num = tmp->columns->find(cName)->num;*/
-    /*}*/
-    /**/
-    /*assert(finalConfig->structure && token == "FROM");*/
-    /**/
-    /*while (stream >> token && token != "WHERE") {*/
-    /*  if (token[token.size() - 1] == ',') {*/
-    /*    token.pop_back();*/
-    /*  }*/
-    /**/
-    /*  assert(json.structure->find(token));*/
-    /*  assert(isTableFree(json.name, token));*/
-    /*  if (!finalConfig->structure->find(token)) {*/
-    /*    Table *newTable = new Table;*/
-    /*    newTable->name = token;*/
-    /*    finalConfig->addTable(newTable);*/
-    /*  }*/
-    /*  fillingTable(*finalConfig->structure->find(token), json.name);*/
-    /*}*/
-    /**/
-    /*if (token == "WHERE") {*/
-    /*  filter(json, *finalConfig, stream);*/
-    /*}*/
-    /**/
-    /*printColumnNames(finalConfig);*/
-    /*printTables(finalConfig->structure, finalConfig->name, "");*/
-    /**/
-    /*delete finalConfig;*/
-
+    selectHandler(table, stream);
   } else if (token == "INSERT") {
     insertHandler(table, stream);
-
   } else if (token == "DELETE") {
     /*assert(stream >> token && token == "FROM");*/
     /*assert(stream >> token);*/

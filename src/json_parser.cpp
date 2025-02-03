@@ -1,6 +1,5 @@
 #include "../include/json_parser.h"
 
-#include <cassert>
 #include <fstream>
 #include <sstream>
 
@@ -33,6 +32,7 @@ string retrieveValue(istringstream &stream) {
 }
 
 void retrieveColumns(HT &table, istringstream &stream, const string &key) {
+  table[key].append(key + "_pk");
   string col = retrieveValue(stream);
   while (col[0]) {
     table[key].append(col);
@@ -44,20 +44,22 @@ Array JsonParser(HT &table) { // возвращает названия табл�
   Array names;
 
   ifstream file("schema.json");
-  assert(file);
 
-  string line;
-  while (getline(file, line)) {
-    istringstream stream(line);
+  if (file.is_open()) {
+    string line;
+    while (getline(file, line)) {
+      istringstream stream(line);
 
-    string key = retrieveValue(stream);
-    if (key == "name") {
-      table.name = retrieveValue(stream);
-    } else if (key == "tuples_limit") {
-      table.tuples_limit = stringToInt(stream);
-    } else if (key[0] && key != "structure") {
-      names.append(key);
-      retrieveColumns(table, stream, key);
+      string key = retrieveValue(stream);
+      if (key == "name") {
+        table.name = retrieveValue(stream);
+      } else if (key == "tuples_limit") {
+        table.tuples_limit = stringToInt(stream);
+      } else if (key[0] && key != "structure") {
+        names.append(key);
+        table[key].name = key;
+        retrieveColumns(table, stream, key);
+      }
     }
   }
 

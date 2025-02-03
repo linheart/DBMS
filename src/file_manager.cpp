@@ -77,29 +77,22 @@ void createFiles(HT &table, Array &names) {
   }
 }
 
-void addLine(HT &table, Array &curTable) {
-  string path = table.name + '/' + curTable.name + '/';
-  ifstream pkFile(path + curTable.name + "_pk_sequence");
+void addLine(HT &table, const string &tName, const string &str) {
+  string path = table.name + '/' + tName + '/';
+  ifstream pkFile(path + tName + "_pk_sequence");
 
   if (pkFile.is_open()) {
     string pk;
     pkFile >> pk;
 
     pk = to_string(stoi(pk) + 1);
-
-    ofstream file(path + curTable.name + "_pk_sequence");
+    ofstream file(path + tName + "_pk_sequence");
     file << pk;
 
-    string line = pk + ',';
-    size_t size = curTable.size();
-    for (size_t i = 0; i < size - 1; i++) {
-      line += table[curTable[i]][0] + ',';
-    }
-    line += table[curTable[size - 1]][0];
+    string line = pk + ',' + str;
 
     int i = ceil((double)(stoi(pk)) / table.tuples_limit);
     path += to_string(i) + ".csv";
-
     if (filesystem::exists(path)) {
       ofstream file(path, ios::app);
       file << line;
