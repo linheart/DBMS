@@ -310,14 +310,14 @@ void insertHandler(HT &table, istringstream &stream) {
   string line;
   size_t size = finalTable[tName].size();
 
-  for (size_t i = 0; i < size; i++) {
+  for (size_t i = 0; i < size - 1; i++) {
     if (!(stream >> token)) {
       cout << "Syntax error: " << size << " values were expected" << endl;
       return;
     }
 
     line += extractWord(token);
-    (i == size - 1) ? line += '\n' : line += ',';
+    (i == size - 2) ? line += '\n' : line += ',';
   }
 
   addLine(table, tName, line);
@@ -364,12 +364,13 @@ void menu(HT &table, const string &str) {
   } else if (token == "DELETE") {
     deleteHandler(table, stream);
   } else if (token == "FREE") {
-    /*Table *curTable = json.structure;*/
-    /*while (curTable) {*/
-    /*  unlockTable(json.name, curTable->name);*/
-    /*  curTable = curTable->next;*/
-    /*}*/
-
+    if (!(stream >> token)) {
+      cout << "Syntax error: Expected 'FREE table'" << endl;
+    } else if (!table[token].size()) {
+      cout << "Invalid error: There's no such table" << endl;
+    } else {
+      unlockTable(table.name, token);
+    }
   } else if (token != "EXIT") {
     cout << "Wrong query" << endl;
   }

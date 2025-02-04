@@ -16,11 +16,9 @@ int main() {
     menu(table, line);
   }
 
-  /*Table *curTable = json.structure;*/
-  /*while (curTable) {*/
-  /*  lockTable(json.name, curTable->name);*/
-  /*  curTable = curTable->next;*/
-  /*}*/
-
+  size_t size = names.size();
+  for (size_t i = 0; i < size; i++) {
+    lockTable(table.name, names[i]);
+  }
   return 0;
 }

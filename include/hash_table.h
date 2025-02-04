@@ -13,8 +13,8 @@ public:
         length(0) {}
 
   Array(const Array &other)
-      : data(new std::string[other.capacity]), capacity(other.capacity),
-        length(other.length), name(other.name) {
+      : name(other.name), data(new std::string[other.capacity]),
+        capacity(other.capacity), length(other.length) {
     for (std::size_t i = 0; i < length; i++) {
       data[i] = other.data[i];
     }
