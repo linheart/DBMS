@@ -102,3 +102,31 @@ void addLine(HT &table, const string &tName, const string &str) {
     }
   }
 }
+
+void remLines(HT &table, const string &tName) {
+  string path = table.name + '/' + tName + '/';
+  string key = tName + table[tName][0];
+  for (int i = 1; filesystem::exists(path + char('0' + i) + ".csv"); i++) {
+    ifstream file(path + char('0' + i) + ".csv");
+    ofstream iFile(path + char('0' + i) + ".csv.tmp");
+    string line;
+    while (getline(file, line)) {
+      if (line[0]) {
+        istringstream stream(line);
+        string tmp;
+        getline(stream, tmp, ',');
+
+        if (table[key].find(tmp) == table[key].size()) {
+          iFile << line << endl;
+        } else {
+          iFile << endl;
+        }
+      }
+    }
+    filesystem::remove(path + char('0' + i) + ".csv");
+    filesystem::rename(path + char('0' + i) + ".csv.tmp",
+                       path + char('0' + i) + ".csv");
+    file.close();
+    iFile.close();
+  }
+}

@@ -293,12 +293,12 @@ void insertHandler(HT &table, istringstream &stream) {
     return;
   } else if (!table[token].size()) {
     cout << "Invalid error: This table does not exist" << endl;
+    return;
   } else if (!isTableFree(table.name, token)) {
     cout << "This table is currently in use" << endl;
     return;
   }
 
-  HT finalTable(table);
   string tName = token;
 
   if (!(stream >> token) || token != "VALUES") {
@@ -306,6 +306,7 @@ void insertHandler(HT &table, istringstream &stream) {
     return;
   }
 
+  HT finalTable(table);
   string line;
   size_t size = finalTable[tName].size();
 
@@ -322,6 +323,34 @@ void insertHandler(HT &table, istringstream &stream) {
   addLine(table, tName, line);
 }
 
+void deleteHandler(HT &table, istringstream &stream) {
+  string token;
+  if (!(stream >> token) || token != "FROM" || !(stream >> token)) {
+    cout << "Syntax error: Expected 'FROM table'" << endl;
+    return;
+  } else if (!table[token].size()) {
+    cout << "Invalid error: This table does not exist" << endl;
+    return;
+  } else if (!isTableFree(table.name, token)) {
+    cout << "This table is currently in use" << endl;
+    return;
+  }
+
+  string tName = token;
+
+  if (!(stream >> token) || token != "WHERE") {
+    cout << "Syntax error: Expected 'WHERE'" << endl;
+    return;
+  }
+
+  HT finaltable(table);
+  Array usedTables;
+  string tmp;
+  filter(finaltable, stream, token, usedTables, tmp);
+
+  remLines(finaltable, tName);
+}
+
 void menu(HT &table, const string &str) {
   istringstream stream(str);
   string token;
@@ -333,26 +362,7 @@ void menu(HT &table, const string &str) {
   } else if (token == "INSERT") {
     insertHandler(table, stream);
   } else if (token == "DELETE") {
-    /*assert(stream >> token && token == "FROM");*/
-    /*assert(stream >> token);*/
-    /*assert(isTableFree(json.name, token));*/
-    /*assert(json.structure->find(token));*/
-    /**/
-    /*Json *finalConfig = new Json;*/
-    /*finalConfig->name = json.name;*/
-    /**/
-    /*Table *table = new Table;*/
-    /*table->name = token;*/
-    /*finalConfig->addTable(table);*/
-    /**/
-    /*assert(stream >> token && token == "WHERE");*/
-    /**/
-    /*fillingTable(*table, json.name);*/
-    /*filter(json, *finalConfig, stream);*/
-    /**/
-    /*delLines(*finalConfig);*/
-    /**/
-    /*delete finalConfig;*/
+    deleteHandler(table, stream);
   } else if (token == "FREE") {
     /*Table *curTable = json.structure;*/
     /*while (curTable) {*/
