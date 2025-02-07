@@ -71,7 +71,7 @@ void createFiles(HT &table, Array &names) {
     path = scheme + '/' + names[i] + '/';
     mkDir(path);
 
-    mkFile(path + "1.csv", names[i] + "_pk," + saveData(table[names[i]]));
+    mkFile(path + "1.csv", saveData(table[names[i]]));
     mkFile(path + names[i] + "_pk_sequence", "0\n");
     mkFile(path + names[i] + "_lock", "0\n");
   }
