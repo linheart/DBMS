@@ -277,6 +277,7 @@ void selectHandler(HT &table, istringstream &stream) {
 
     if (usedTables.find(tName) == usedTables.size()) {
       editTable(finaltable, tName, cName);
+      usedTables.append(tName);
     }
   }
 
